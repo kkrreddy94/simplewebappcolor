@@ -1,0 +1,53 @@
+format_version: 10
+pipelines:
+  my-pipeline-2:
+    group: defaultGroup
+    label_template: ${COUNT}
+    lock_behavior: none
+    display_order: -1
+    materials:
+      git-e56f8fc:
+        git: https://github.com/kkrreddy94/simplewebappcolor.git
+        shallow_clone: false
+        auto_update: true
+        branch: master
+    stages:
+    - test-run:
+        fetch_materials: true
+        keep_artifacts: false
+        clean_workspace: false
+        approval:
+          type: success
+          allow_only_on_success: false
+        jobs:
+          run:
+            timeout: 0
+            tasks:
+            - exec:
+                arguments:
+                - pip
+                - install
+                - flask
+                command: RUN
+                run_if: passed
+            - exec:
+                arguments:
+                - app.py
+                - /opt/
+                command: COPY
+                run_if: passed
+            - exec:
+                arguments:
+                - /templates/hello.html
+                - /opt/templates/
+                command: COPY
+                run_if: passed
+            - exec:
+                arguments:
+                - FLASK_APP=/opt/app.py
+                - flask
+                - run
+                - --host=0.0.0.0
+                - --port=8080
+                command: ENTRYPOINT
+                run_if: passed
